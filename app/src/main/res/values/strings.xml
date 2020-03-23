@@ -1,6 +1,25 @@
 <resources>
     <string name="app_name">Simple Calculator</string>
-    <string name="press_me">Press me!</string>
     <string name="syntax_error">#Syntax error!</string>
     <string name="divided_by_zero">#Divided by zero!</string>
+    <string name="zero">0</string>
+    <string name="one">1</string>
+    <string name="two">2</string>
+    <string name="three">3</string>
+    <string name="four">4</string>
+    <string name="five">5</string>
+    <string name="six">6</string>
+    <string name="seven">7</string>
+    <string name="eight">8</string>
+    <string name="nine">9</string>
+    <string name="dot">.</string>
+    <string name="equals">=</string>
+    <string name="convert">cnv</string>
+    <string name="left_paren">(</string>
+    <string name="right_paren">)</string>
+    <string name="backspace_button">backspace button</string>
+    <string name="div">\u00f7</string>
+    <string name="mul">\u00d7</string>
+    <string name="sub">\u2212</string>
+    <string name="add">\u002b</string>
 </resources>
