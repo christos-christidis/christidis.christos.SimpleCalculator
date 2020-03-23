@@ -22,4 +22,12 @@
     <string name="mul">\u00d7</string>
     <string name="sub">\u2212</string>
     <string name="add">\u002b</string>
+    <string name="convert_to">Convert to:</string>
+    <string name="usd">USD (US Dollar)</string>
+    <string name="eur">EUR (Euro)</string>
+    <string name="jpy">JPY (Japanese Yen)</string>
+    <string name="gbp">GBP (Pound Sterling)</string>
+    <string name="aud">AUD (Australian Dollar)</string>
+    <string name="cad">CAD (Canadian Dollar)</string>
+    <string name="chf">CHF (Swiss Franc)</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.christidischristos.simplecalculator.viewmodels
 
 import android.app.Application
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -28,11 +29,18 @@ class SimpleCalcViewModel(app: Application) : AndroidViewModel(app) {
     val userStr: LiveData<String>
         get() = _userStr
 
+    private var _showingError = false
+
     fun clear() {
         _userStr.value = ""
+        _showingError = false
     }
 
     fun plainButtonClicked(view: View) {
+        if (_showingError) {
+            clear()
+        }
+
         val s = when (view.id) {
             R.id.button_0 -> "0"
             R.id.button_1 -> "1"
@@ -59,6 +67,10 @@ class SimpleCalcViewModel(app: Application) : AndroidViewModel(app) {
 
     @Suppress("UNUSED_PARAMETER")
     fun backspaceButtonClicked(view: View) {
+        if (_showingError) {
+            clear()
+            return
+        }
         val numChars = userStr.value!!.length
         if (numChars != 0) {
             _userStr.value = userStr.value!!.substring(0, numChars - 1)
@@ -67,16 +79,24 @@ class SimpleCalcViewModel(app: Application) : AndroidViewModel(app) {
 
     @Suppress("UNUSED_PARAMETER")
     fun equalsButtonClicked(view: View) {
-        if (userStr.value!!.isNotBlank()) {
-            try {
-                val tree = parseString(userStr.value!!)
-                val result = EvalVisitor().visit(tree)
-                printResult(result)
-            } catch (e: IllegalStateException) {
-                _userStr.value = getApplication<Application>().getString(R.string.syntax_error)
-            } catch (e: DivideByZeroException) {
-                _userStr.value = getApplication<Application>().getString(R.string.divided_by_zero)
-            }
+        computeResult()
+    }
+
+    private fun computeResult() {
+        if (_showingError || userStr.value!!.isBlank()) {
+            return
+        }
+
+        try {
+            val tree = parseString(userStr.value!!)
+            val result = EvalVisitor().visit(tree)
+            printResult(result)
+        } catch (e: IllegalStateException) {
+            _userStr.value = getApplication<Application>().getString(R.string.syntax_error)
+            _showingError = true
+        } catch (e: DivideByZeroException) {
+            _userStr.value = getApplication<Application>().getString(R.string.divided_by_zero)
+            _showingError = true
         }
     }
 
@@ -95,6 +115,24 @@ class SimpleCalcViewModel(app: Application) : AndroidViewModel(app) {
             String.format(Locale.US, "%g", result)
     }
 
-    fun convertButtonClicked(view: View) {
+    fun convertTo(targetCurrency: Currency) {
+        if (userStr.value!!.isEmpty()) {
+            return
+        }
+
+        computeResult()
+        if (_showingError) {
+            return
+        }
+
+        val currencyUnits = userStr.value!!.toDouble()
+
+        Log.i(
+            "WTF",
+            "Converting $currencyUnits units from ${baseCurrency.value} to $targetCurrency"
+        )
+
+        _userStr.value = "RESULT!"
+        _baseCurrency.value = targetCurrency
     }
 }
