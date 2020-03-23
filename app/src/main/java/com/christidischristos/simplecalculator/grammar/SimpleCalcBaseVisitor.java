@@ -1,5 +1,7 @@
 package com.christidischristos.simplecalculator.grammar;
 
+// Generated from SimpleCalc.g4 by ANTLR 4.8
+
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 public class SimpleCalcBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements SimpleCalcVisitor<T> {
@@ -10,6 +12,11 @@ public class SimpleCalcBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 
     @Override
     public T visitParens(SimpleCalcParser.ParensContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public T visitUnaryMinusExpr(SimpleCalcParser.UnaryMinusExprContext ctx) {
         return visitChildren(ctx);
     }
 

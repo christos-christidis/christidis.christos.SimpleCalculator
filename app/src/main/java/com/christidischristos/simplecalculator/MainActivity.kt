@@ -2,8 +2,8 @@ package com.christidischristos.simplecalculator
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import com.christidischristos.simplecalculator.grammar.DivideByZeroException
 import com.christidischristos.simplecalculator.grammar.EvalVisitor
 import com.christidischristos.simplecalculator.grammar.SimpleCalcLexer
 import com.christidischristos.simplecalculator.grammar.SimpleCalcParser
@@ -12,6 +12,8 @@ import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ParseTree
 import java.lang.IllegalStateException
+import java.util.*
+import kotlin.math.truncate
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,7 +25,6 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         button_backspace.setOnLongClickListener {
-            Log.i("WTF", "long click")
             screen.text = ""
             true
         }
@@ -55,18 +56,16 @@ class MainActivity : AppCompatActivity() {
             R.id.button_mul -> screen.append("x")
             R.id.button_sub -> screen.append("-")
             R.id.button_add -> screen.append("+")
-            R.id.button_dot -> {
-
-            }
+            R.id.button_dot -> screen.append(".")
             R.id.button_equals -> {
                 if (screen.text.isNotBlank()) {
                     try {
                         val tree = parseString(screen.text.toString())
-                        val visitor = EvalVisitor()
-                        screen.text = visitor.visit(tree).toString()
+                        val result = EvalVisitor().visit(tree)
+                        printResult(result)
                     } catch (e: IllegalStateException) {
                         screen.text = getString(R.string.syntax_error)
-                    } catch (e: ArithmeticException) {
+                    } catch (e: DivideByZeroException) {
                         screen.text = getString(R.string.divided_by_zero)
                     }
                 }
@@ -81,4 +80,12 @@ class MainActivity : AppCompatActivity() {
         val parser = SimpleCalcParser(tokens)
         return parser.expr()
     }
+
+    private fun printResult(result: Double) {
+        screen.text = if (result == truncate(result))
+            result.toLong().toString()
+        else
+            String.format(Locale.US, "%g", result)
+    }
 }
+
