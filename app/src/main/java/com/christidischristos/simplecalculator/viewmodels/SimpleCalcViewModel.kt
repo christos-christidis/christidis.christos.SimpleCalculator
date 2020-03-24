@@ -1,25 +1,29 @@
 package com.christidischristos.simplecalculator.viewmodels
 
 import android.app.Application
-import android.util.Log
 import android.view.View
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.christidischristos.simplecalculator.BuildConfig
 import com.christidischristos.simplecalculator.R
 import com.christidischristos.simplecalculator.enums.Currency
 import com.christidischristos.simplecalculator.grammar.DivideByZeroException
 import com.christidischristos.simplecalculator.grammar.EvalVisitor
 import com.christidischristos.simplecalculator.grammar.SimpleCalcLexer
 import com.christidischristos.simplecalculator.grammar.SimpleCalcParser
+import com.christidischristos.simplecalculator.network.HistoricalRatesResponse
+import com.christidischristos.simplecalculator.network.FixerApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ParseTree
-import java.lang.IllegalStateException
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.truncate
 
-class SimpleCalcViewModel(app: Application) : AndroidViewModel(app) {
+class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
 
     private val _baseCurrency = MutableLiveData(Currency.EUR)
     val baseCurrency: LiveData<Currency>
@@ -29,16 +33,24 @@ class SimpleCalcViewModel(app: Application) : AndroidViewModel(app) {
     val userStr: LiveData<String>
         get() = _userStr
 
-    private var _showingError = false
+    private val _toastMessage = MutableLiveData<Int>()
+    val toastMessage: LiveData<Int>
+        get() = _toastMessage
 
-    fun clear() {
+    fun toastMessageSeen() {
+        _toastMessage.value = null
+    }
+
+    private var _errorOnScreen = false
+
+    fun clearScreen() {
         _userStr.value = ""
-        _showingError = false
+        _errorOnScreen = false
     }
 
     fun plainButtonClicked(view: View) {
-        if (_showingError) {
-            clear()
+        if (_errorOnScreen) {
+            clearScreen()
         }
 
         val s = when (view.id) {
@@ -67,8 +79,8 @@ class SimpleCalcViewModel(app: Application) : AndroidViewModel(app) {
 
     @Suppress("UNUSED_PARAMETER")
     fun backspaceButtonClicked(view: View) {
-        if (_showingError) {
-            clear()
+        if (_errorOnScreen) {
+            clearScreen()
             return
         }
         val numChars = userStr.value!!.length
@@ -79,24 +91,22 @@ class SimpleCalcViewModel(app: Application) : AndroidViewModel(app) {
 
     @Suppress("UNUSED_PARAMETER")
     fun equalsButtonClicked(view: View) {
-        computeResult()
+        if (!_errorOnScreen && userStr.value!!.isNotEmpty()) {
+            computeResult()
+        }
     }
 
     private fun computeResult() {
-        if (_showingError || userStr.value!!.isBlank()) {
-            return
-        }
-
         try {
             val tree = parseString(userStr.value!!)
             val result = EvalVisitor().visit(tree)
             printResult(result)
         } catch (e: IllegalStateException) {
-            _userStr.value = getApplication<Application>().getString(R.string.syntax_error)
-            _showingError = true
+            _userStr.value = _app.getString(R.string.syntax_error)
+            _errorOnScreen = true
         } catch (e: DivideByZeroException) {
-            _userStr.value = getApplication<Application>().getString(R.string.divided_by_zero)
-            _showingError = true
+            _userStr.value = _app.getString(R.string.divided_by_zero)
+            _errorOnScreen = true
         }
     }
 
@@ -116,23 +126,60 @@ class SimpleCalcViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun convertTo(targetCurrency: Currency) {
-        if (userStr.value!!.isEmpty()) {
+        if (inputInvalid()) {
+            _toastMessage.value = R.string.input_not_valid
             return
+        }
+
+        val amount = userStr.value!!.toDouble()
+
+        GlobalScope.launch {
+            try {
+                val response = FixerApi.convertService.getExchangeRate(
+                    getYesterdayDateString(), BuildConfig.FIXER_IO_KEY,
+                    baseCurrency.value.toString(), targetCurrency.toString()
+                )
+
+                if (response.success) {
+                    val rate = getRate(response, targetCurrency)
+                    _userStr.postValue("${amount * rate}")
+                    _baseCurrency.postValue(targetCurrency)
+                } else {
+                    _userStr.postValue(_app.getString(R.string.api_error, response.error!!.code))
+                    _errorOnScreen = true
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _userStr.postValue(_app.getString(R.string.network_error))
+                _errorOnScreen = true
+            }
+        }
+    }
+
+    private fun inputInvalid(): Boolean {
+        if (_errorOnScreen || userStr.value!!.isEmpty()) {
+            return true
         }
 
         computeResult()
-        if (_showingError) {
-            return
+        return _errorOnScreen
+    }
+
+    private fun getYesterdayDateString(): String {
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DATE, -1)
+        return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(calendar.time)
+    }
+
+    private fun getRate(response: HistoricalRatesResponse, targetCurrency: Currency): Double {
+        return when (targetCurrency) {
+            Currency.USD -> response.rates!!.USD!!
+            Currency.EUR -> response.rates!!.EUR!!
+            Currency.JPY -> response.rates!!.JPY!!
+            Currency.GBP -> response.rates!!.GBP!!
+            Currency.AUD -> response.rates!!.AUD!!
+            Currency.CAD -> response.rates!!.CAD!!
+            Currency.CHF -> response.rates!!.CHF!!
         }
-
-        val currencyUnits = userStr.value!!.toDouble()
-
-        Log.i(
-            "WTF",
-            "Converting $currencyUnits units from ${baseCurrency.value} to $targetCurrency"
-        )
-
-        _userStr.value = "RESULT!"
-        _baseCurrency.value = targetCurrency
     }
 }

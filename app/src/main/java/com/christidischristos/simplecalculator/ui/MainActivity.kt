@@ -4,15 +4,20 @@ import android.os.Bundle
 import android.view.ContextMenu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.christidischristos.simplecalculator.R
 import com.christidischristos.simplecalculator.databinding.ActivityMainBinding
 import com.christidischristos.simplecalculator.enums.Currency
+import com.christidischristos.simplecalculator.util.MyToast
+import com.christidischristos.simplecalculator.util.NetUtils
 import com.christidischristos.simplecalculator.viewmodelfactories.SimpleCalcViewModelFactory
 import com.christidischristos.simplecalculator.viewmodels.SimpleCalcViewModel
 import kotlinx.android.synthetic.main.activity_main.*
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,11 +42,18 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
 
         button_backspace.setOnLongClickListener {
-            _viewModel.clear()
+            _viewModel.clearScreen()
             true
         }
 
         registerForContextMenu(button_convert)
+
+        _viewModel.toastMessage.observe(this, Observer {
+            it?.let {
+                _viewModel.toastMessageSeen()
+                MyToast.showToastCenter(this, it, Toast.LENGTH_LONG)
+            }
+        })
     }
 
     fun convertButtonClicked(view: View) {
@@ -61,7 +73,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        _viewModel.convertTo(Currency.values()[item.itemId])
+        if (NetUtils.isInternetAvailable(this)) {
+            _viewModel.convertTo(Currency.values()[item.itemId])
+        } else {
+            MyToast.showToastCenter(this, R.string.internet_not_available, Toast.LENGTH_LONG)
+        }
         return true
     }
 }
