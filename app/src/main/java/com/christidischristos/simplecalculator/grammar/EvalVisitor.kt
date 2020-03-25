@@ -1,8 +1,8 @@
 package com.christidischristos.simplecalculator.grammar
 
 class EvalVisitor : SimpleCalcBaseVisitor<Double>() {
-    override fun visitUnaryMinusExpr(ctx: SimpleCalcParser.UnaryMinusExprContext?): Double {
-        return -1 * visit(ctx!!.expr())
+    override fun visitMain(ctx: SimpleCalcParser.MainContext?): Double {
+        return visit(ctx!!.expr())
     }
 
     override fun visitNumber(ctx: SimpleCalcParser.NumberContext?): Double {
@@ -11,6 +11,10 @@ class EvalVisitor : SimpleCalcBaseVisitor<Double>() {
 
     override fun visitParens(ctx: SimpleCalcParser.ParensContext?): Double {
         return visit(ctx!!.expr())
+    }
+
+    override fun visitUnaryMinusExpr(ctx: SimpleCalcParser.UnaryMinusExprContext?): Double {
+        return -1 * visit(ctx!!.expr())
     }
 
     override fun visitAddSub(ctx: SimpleCalcParser.AddSubContext?): Double {

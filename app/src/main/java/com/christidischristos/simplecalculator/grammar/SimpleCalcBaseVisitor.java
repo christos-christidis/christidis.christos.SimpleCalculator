@@ -6,6 +6,11 @@ import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 public class SimpleCalcBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements SimpleCalcVisitor<T> {
     @Override
+    public T visitMain(SimpleCalcParser.MainContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override
     public T visitNumber(SimpleCalcParser.NumberContext ctx) {
         return visitChildren(ctx);
     }

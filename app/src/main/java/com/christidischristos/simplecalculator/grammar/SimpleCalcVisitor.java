@@ -5,6 +5,8 @@ package com.christidischristos.simplecalculator.grammar;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 interface SimpleCalcVisitor<T> extends ParseTreeVisitor<T> {
+    T visitMain(SimpleCalcParser.MainContext ctx);
+
     T visitNumber(SimpleCalcParser.NumberContext ctx);
 
     T visitParens(SimpleCalcParser.ParensContext ctx);

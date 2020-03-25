@@ -12,12 +12,11 @@ import com.christidischristos.simplecalculator.grammar.DivideByZeroException
 import com.christidischristos.simplecalculator.grammar.EvalVisitor
 import com.christidischristos.simplecalculator.grammar.SimpleCalcLexer
 import com.christidischristos.simplecalculator.grammar.SimpleCalcParser
-import com.christidischristos.simplecalculator.network.HistoricalRatesResponse
 import com.christidischristos.simplecalculator.network.FixerApi
+import com.christidischristos.simplecalculator.network.HistoricalRatesResponse
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.tree.ParseTree
 import java.text.SimpleDateFormat
 import java.util.*
@@ -98,7 +97,7 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
 
     private fun computeResult() {
         try {
-            val tree = parseString(userStr.value!!)
+            val tree = parseString()
             val result = EvalVisitor().visit(tree)
             printResult(result)
         } catch (e: IllegalStateException) {
@@ -110,12 +109,22 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
         }
     }
 
-    private fun parseString(userText: String): ParseTree {
-        val charStream = CharStreams.fromString(userText)
+    private fun parseString(): ParseTree {
+        val charStream = CharStreams.fromString(userStr.value)
         val lexer = SimpleCalcLexer(charStream)
         val tokens = CommonTokenStream(lexer)
-        val parser = SimpleCalcParser(tokens)
-        return parser.expr()
+        val parser = SimpleCalcParser(tokens).apply {
+            addErrorListener(object : BaseErrorListener() {
+                override fun syntaxError(
+                    recognizer: Recognizer<*, *>?, offendingSymbol: Any?, line: Int,
+                    charPositionInLine: Int, msg: String?, e: RecognitionException?
+                ) {
+                    // normally the parser doesn't throw exception on mismatches!
+                    throw IllegalStateException()
+                }
+            })
+        }
+        return parser.main()
     }
 
     private fun printResult(result: Double) {
