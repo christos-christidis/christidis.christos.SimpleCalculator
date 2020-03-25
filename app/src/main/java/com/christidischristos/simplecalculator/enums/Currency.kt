@@ -18,4 +18,9 @@ enum class Currency {
             CHF -> R.string.chf
         }
     }
+
+    companion object {
+        val nonEuroCurrencies = values().joinToString(",")
+            .replace("EUR,", "")
+    }
 }

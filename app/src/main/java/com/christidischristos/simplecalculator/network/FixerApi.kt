@@ -1,5 +1,6 @@
 package com.christidischristos.simplecalculator.network
 
+import com.christidischristos.simplecalculator.enums.Currency
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -26,7 +27,7 @@ interface ConvertService {
         @Path("date") yesterday: String,
         @Query("access_key") apiKey: String,
         @Query("base") baseCurrency: String,
-        @Query("symbols") targetCurrency: String
+        @Query("symbols") targetCurrencies: String
     ): HistoricalRatesResponse
 }
 

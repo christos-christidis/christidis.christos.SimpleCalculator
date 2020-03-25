@@ -13,7 +13,7 @@ import com.christidischristos.simplecalculator.grammar.EvalVisitor
 import com.christidischristos.simplecalculator.grammar.SimpleCalcLexer
 import com.christidischristos.simplecalculator.grammar.SimpleCalcParser
 import com.christidischristos.simplecalculator.network.FixerApi
-import com.christidischristos.simplecalculator.network.HistoricalRatesResponse
+import com.christidischristos.simplecalculator.util.CurrencyUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -161,13 +161,13 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
             try {
                 val response = FixerApi.convertService.getExchangeRate(
                     getYesterdayDateString(), BuildConfig.FIXER_IO_KEY,
-                    baseCurrency.value.toString(), targetCurrency.toString()
+                    "EUR", Currency.nonEuroCurrencies
                 )
 
                 if (response.success) {
                     val amount = if (_state == State.ENTERING_INPUT)
                         computeResult(print = false) else userStr.value!!.toDouble()
-                    val rate = getRate(response, targetCurrency)
+                    val rate = CurrencyUtils.getRate(baseCurrency.value!!, targetCurrency, response)
                     printResult(amount * rate)
                     _baseCurrency.postValue(targetCurrency)
                 } else {
@@ -197,17 +197,5 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.DATE, -1)
         return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(calendar.time)
-    }
-
-    private fun getRate(response: HistoricalRatesResponse, targetCurrency: Currency): Double {
-        return when (targetCurrency) {
-            Currency.USD -> response.rates!!.USD!!
-            Currency.EUR -> response.rates!!.EUR!!
-            Currency.JPY -> response.rates!!.JPY!!
-            Currency.GBP -> response.rates!!.GBP!!
-            Currency.AUD -> response.rates!!.AUD!!
-            Currency.CAD -> response.rates!!.CAD!!
-            Currency.CHF -> response.rates!!.CHF!!
-        }
     }
 }
