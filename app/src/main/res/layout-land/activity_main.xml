@@ -21,7 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:paddingTop="16dp"
+            android:paddingTop="8dp"
             android:paddingEnd="16dp"
             android:text="@{viewModel.baseCurrency.toString()}"
             android:textSize="20sp"
@@ -35,7 +35,10 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:gravity="center_vertical|end"
-            android:padding="16dp"
+            android:paddingStart="16dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp"
             android:text="@{viewModel.userStr}"
             android:textSize="30sp"
             app:layout_constraintBottom_toTopOf="@id/guideline"
@@ -51,198 +54,198 @@
 
         <Button
             android:id="@+id/button_convert"
-            style="@style/CalculatorButton.Big"
+            style="@style/CalculatorButton.Small"
             android:onClick="convertButtonClicked"
             android:text="@string/convert"
-            app:layout_constraintBottom_toTopOf="@id/button_7"
+            app:layout_constraintBottom_toTopOf="@id/button_6"
             app:layout_constraintEnd_toStartOf="@id/button_left_paren"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/guideline" />
 
         <Button
             android:id="@+id/button_left_paren"
-            style="@style/CalculatorButton.Big"
+            style="@style/CalculatorButton.Small"
             android:onClick="@{viewModel::plainButtonClicked}"
             android:text="@string/left_paren"
-            app:layout_constraintBottom_toTopOf="@id/button_8"
+            app:layout_constraintBottom_toTopOf="@id/button_7"
             app:layout_constraintEnd_toStartOf="@id/button_right_paren"
             app:layout_constraintStart_toEndOf="@id/button_convert"
             app:layout_constraintTop_toBottomOf="@+id/guideline" />
 
         <Button
             android:id="@+id/button_right_paren"
-            style="@style/CalculatorButton.Big"
+            style="@style/CalculatorButton.Small"
             android:onClick="@{viewModel::plainButtonClicked}"
             android:text="@string/right_paren"
-            app:layout_constraintBottom_toTopOf="@id/button_9"
-            app:layout_constraintEnd_toStartOf="@id/button_backspace"
+            app:layout_constraintBottom_toTopOf="@id/button_8"
+            app:layout_constraintEnd_toStartOf="@id/button_div"
             app:layout_constraintStart_toEndOf="@id/button_left_paren"
             app:layout_constraintTop_toBottomOf="@+id/guideline" />
 
-        <ImageButton
-            android:id="@+id/button_backspace"
-            style="@style/CalculatorButton.Big"
-            android:contentDescription="@string/backspace_button"
-            android:onClick="@{viewModel::backspaceButtonClicked}"
-            android:src="@drawable/ic_backspace"
-            app:layout_constraintBottom_toTopOf="@id/button_div"
-            app:layout_constraintEnd_toEndOf="parent"
+        <Button
+            android:id="@+id/button_div"
+            style="@style/CalculatorButton.Small"
+            android:onClick="@{viewModel::plainButtonClicked}"
+            android:text="@string/div"
+            app:layout_constraintBottom_toTopOf="@id/button_9"
+            app:layout_constraintEnd_toStartOf="@+id/button_backspace"
             app:layout_constraintStart_toEndOf="@id/button_right_paren"
             app:layout_constraintTop_toBottomOf="@id/guideline" />
 
+        <ImageButton
+            android:id="@+id/button_backspace"
+            style="@style/CalculatorButton.Small"
+            android:contentDescription="@string/backspace_button"
+            android:onClick="@{viewModel::backspaceButtonClicked}"
+            android:src="@drawable/ic_backspace"
+            app:layout_constraintBottom_toTopOf="@id/button_mul"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/button_div"
+            app:layout_constraintTop_toBottomOf="@id/guideline" />
+
         <Button
-            android:id="@+id/button_7"
-            style="@style/CalculatorButton.Big"
+            android:id="@+id/button_6"
+            style="@style/CalculatorButton.Small"
             android:onClick="@{viewModel::plainButtonClicked}"
-            android:text="@string/seven"
-            app:layout_constraintBottom_toTopOf="@id/button_4"
-            app:layout_constraintEnd_toStartOf="@id/button_8"
+            android:text="@string/six"
+            app:layout_constraintBottom_toTopOf="@id/button_2"
+            app:layout_constraintEnd_toStartOf="@id/button_7"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/button_convert" />
 
         <Button
-            android:id="@+id/button_8"
-            style="@style/CalculatorButton.Big"
+            android:id="@+id/button_7"
+            style="@style/CalculatorButton.Small"
             android:onClick="@{viewModel::plainButtonClicked}"
-            android:text="@string/eight"
-            app:layout_constraintBottom_toTopOf="@id/button_5"
-            app:layout_constraintEnd_toStartOf="@id/button_9"
-            app:layout_constraintStart_toEndOf="@id/button_7"
+            android:text="@string/seven"
+            app:layout_constraintBottom_toTopOf="@id/button_3"
+            app:layout_constraintEnd_toStartOf="@id/button_8"
+            app:layout_constraintStart_toEndOf="@id/button_6"
             app:layout_constraintTop_toBottomOf="@+id/button_left_paren" />
 
         <Button
-            android:id="@+id/button_9"
-            style="@style/CalculatorButton.Big"
+            android:id="@+id/button_8"
+            style="@style/CalculatorButton.Small"
             android:onClick="@{viewModel::plainButtonClicked}"
-            android:text="@string/nine"
-            app:layout_constraintBottom_toTopOf="@id/button_6"
-            app:layout_constraintEnd_toStartOf="@id/button_div"
-            app:layout_constraintStart_toEndOf="@id/button_8"
+            android:text="@string/eight"
+            app:layout_constraintBottom_toTopOf="@id/button_4"
+            app:layout_constraintEnd_toStartOf="@id/button_9"
+            app:layout_constraintStart_toEndOf="@id/button_7"
             app:layout_constraintTop_toBottomOf="@+id/button_right_paren" />
 
         <Button
-            android:id="@+id/button_div"
-            style="@style/CalculatorButton.Big"
+            android:id="@+id/button_9"
+            style="@style/CalculatorButton.Small"
             android:onClick="@{viewModel::plainButtonClicked}"
-            android:text="@string/div"
-            app:layout_constraintBottom_toTopOf="@id/button_mul"
+            android:text="@string/nine"
+            app:layout_constraintBottom_toTopOf="@id/button_5"
+            app:layout_constraintEnd_toStartOf="@id/button_mul"
+            app:layout_constraintStart_toEndOf="@id/button_8"
+            app:layout_constraintTop_toBottomOf="@+id/button_div" />
+
+        <Button
+            android:id="@+id/button_mul"
+            style="@style/CalculatorButton.Small"
+            android:onClick="@{viewModel::plainButtonClicked}"
+            android:text="@string/mul"
+            app:layout_constraintBottom_toTopOf="@id/button_sub"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/button_9"
             app:layout_constraintTop_toBottomOf="@id/button_backspace" />
 
         <Button
-            android:id="@+id/button_4"
-            style="@style/CalculatorButton.Big"
-            android:onClick="@{viewModel::plainButtonClicked}"
-            android:text="@string/four"
-            app:layout_constraintBottom_toTopOf="@id/button_1"
-            app:layout_constraintEnd_toStartOf="@id/button_5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button_7" />
-
-        <Button
-            android:id="@+id/button_5"
-            style="@style/CalculatorButton.Big"
-            android:onClick="@{viewModel::plainButtonClicked}"
-            android:text="@string/five"
-            app:layout_constraintBottom_toTopOf="@id/button_2"
-            app:layout_constraintEnd_toStartOf="@id/button_6"
-            app:layout_constraintStart_toEndOf="@id/button_4"
-            app:layout_constraintTop_toBottomOf="@+id/button_8" />
-
-        <Button
-            android:id="@+id/button_6"
-            style="@style/CalculatorButton.Big"
-            android:onClick="@{viewModel::plainButtonClicked}"
-            android:text="@string/six"
-            app:layout_constraintBottom_toTopOf="@id/button_3"
-            app:layout_constraintEnd_toStartOf="@id/button_mul"
-            app:layout_constraintStart_toEndOf="@id/button_5"
-            app:layout_constraintTop_toBottomOf="@+id/button_9" />
-
-        <Button
-            android:id="@+id/button_mul"
-            style="@style/CalculatorButton.Big"
-            android:onClick="@{viewModel::plainButtonClicked}"
-            android:text="@string/mul"
-            app:layout_constraintBottom_toTopOf="@id/button_sub"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/button_6"
-            app:layout_constraintTop_toBottomOf="@id/button_div" />
-
-        <Button
-            android:id="@+id/button_1"
-            style="@style/CalculatorButton.Big"
-            android:onClick="@{viewModel::plainButtonClicked}"
-            android:text="@string/one"
-            app:layout_constraintBottom_toTopOf="@id/button_0"
-            app:layout_constraintEnd_toStartOf="@id/button_2"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button_4" />
-
-        <Button
             android:id="@+id/button_2"
-            style="@style/CalculatorButton.Big"
+            style="@style/CalculatorButton.Small"
             android:onClick="@{viewModel::plainButtonClicked}"
             android:text="@string/two"
-            app:layout_constraintBottom_toTopOf="@id/button_dot"
+            app:layout_constraintBottom_toTopOf="@id/button_0"
             app:layout_constraintEnd_toStartOf="@id/button_3"
-            app:layout_constraintStart_toEndOf="@id/button_1"
-            app:layout_constraintTop_toBottomOf="@+id/button_5" />
-
-        <Button
-            android:id="@+id/button_3"
-            style="@style/CalculatorButton.Big"
-            android:onClick="@{viewModel::plainButtonClicked}"
-            android:text="@string/three"
-            app:layout_constraintBottom_toTopOf="@id/button_equals"
-            app:layout_constraintEnd_toStartOf="@id/button_sub"
-            app:layout_constraintStart_toEndOf="@id/button_2"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/button_6" />
 
         <Button
+            android:id="@+id/button_3"
+            style="@style/CalculatorButton.Small"
+            android:onClick="@{viewModel::plainButtonClicked}"
+            android:text="@string/three"
+            app:layout_constraintBottom_toTopOf="@id/button_1"
+            app:layout_constraintEnd_toStartOf="@id/button_4"
+            app:layout_constraintStart_toEndOf="@id/button_2"
+            app:layout_constraintTop_toBottomOf="@+id/button_7" />
+
+        <Button
+            android:id="@+id/button_4"
+            style="@style/CalculatorButton.Small"
+            android:onClick="@{viewModel::plainButtonClicked}"
+            android:text="@string/four"
+            app:layout_constraintBottom_toTopOf="@id/button_dot"
+            app:layout_constraintEnd_toStartOf="@id/button_5"
+            app:layout_constraintStart_toEndOf="@id/button_3"
+            app:layout_constraintTop_toBottomOf="@+id/button_8" />
+
+        <Button
+            android:id="@+id/button_5"
+            style="@style/CalculatorButton.Small"
+            android:onClick="@{viewModel::plainButtonClicked}"
+            android:text="@string/five"
+            app:layout_constraintBottom_toTopOf="@id/button_equals"
+            app:layout_constraintEnd_toStartOf="@id/button_sub"
+            app:layout_constraintStart_toEndOf="@id/button_4"
+            app:layout_constraintTop_toBottomOf="@+id/button_9" />
+
+        <Button
             android:id="@+id/button_sub"
-            style="@style/CalculatorButton.Big"
+            style="@style/CalculatorButton.Small"
             android:onClick="@{viewModel::plainButtonClicked}"
             android:text="@string/sub"
             app:layout_constraintBottom_toTopOf="@id/button_add"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/button_3"
+            app:layout_constraintStart_toEndOf="@id/button_5"
             app:layout_constraintTop_toBottomOf="@+id/button_mul" />
 
         <Button
             android:id="@+id/button_0"
-            style="@style/CalculatorButton.Big"
+            style="@style/CalculatorButton.Small"
             android:onClick="@{viewModel::plainButtonClicked}"
             android:text="@string/zero"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/button_dot"
+            app:layout_constraintEnd_toStartOf="@id/button_1"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button_1" />
+            app:layout_constraintTop_toBottomOf="@+id/button_2" />
+
+        <Button
+            android:id="@+id/button_1"
+            style="@style/CalculatorButton.Small"
+            android:onClick="@{viewModel::plainButtonClicked}"
+            android:text="@string/one"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/button_dot"
+            app:layout_constraintStart_toEndOf="@id/button_0"
+            app:layout_constraintTop_toBottomOf="@+id/button_3" />
 
         <Button
             android:id="@+id/button_dot"
-            style="@style/CalculatorButton.Big"
+            style="@style/CalculatorButton.Small"
             android:onClick="@{viewModel::plainButtonClicked}"
             android:text="@string/dot"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/button_equals"
-            app:layout_constraintStart_toEndOf="@id/button_0"
-            app:layout_constraintTop_toBottomOf="@+id/button_2" />
+            app:layout_constraintStart_toEndOf="@id/button_1"
+            app:layout_constraintTop_toBottomOf="@+id/button_4" />
 
         <Button
             android:id="@+id/button_equals"
-            style="@style/CalculatorButton.Big"
+            style="@style/CalculatorButton.Small"
             android:onClick="@{viewModel::equalsButtonClicked}"
             android:text="@string/equals"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/button_add"
             app:layout_constraintStart_toEndOf="@id/button_dot"
-            app:layout_constraintTop_toBottomOf="@+id/button_3" />
+            app:layout_constraintTop_toBottomOf="@+id/button_5" />
 
         <Button
             android:id="@+id/button_add"
-            style="@style/CalculatorButton.Big"
+            style="@style/CalculatorButton.Small"
             android:onClick="@{viewModel::plainButtonClicked}"
             android:text="@string/add"
             app:layout_constraintBottom_toBottomOf="parent"
