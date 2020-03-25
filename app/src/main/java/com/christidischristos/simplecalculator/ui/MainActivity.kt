@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
 
         button_backspace.setOnLongClickListener {
-            _viewModel.clearScreen()
+            _viewModel.clearScreenForInput()
             true
         }
 

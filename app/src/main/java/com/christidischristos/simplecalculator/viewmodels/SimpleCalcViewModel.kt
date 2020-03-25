@@ -14,13 +14,13 @@ import com.christidischristos.simplecalculator.grammar.SimpleCalcLexer
 import com.christidischristos.simplecalculator.grammar.SimpleCalcParser
 import com.christidischristos.simplecalculator.network.FixerApi
 import com.christidischristos.simplecalculator.network.HistoricalRatesResponse
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.tree.ParseTree
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.truncate
 
 class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
 
@@ -40,16 +40,20 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
         _toastMessage.value = null
     }
 
-    private var _errorOnScreen = false
+    private enum class State {
+        ENTERING_INPUT, SHOWING_RESULT, SHOWING_ERROR
+    }
 
-    fun clearScreen() {
+    private var _state = State.ENTERING_INPUT
+
+    fun clearScreenForInput() {
         _userStr.value = ""
-        _errorOnScreen = false
+        _state = State.ENTERING_INPUT
     }
 
     fun plainButtonClicked(view: View) {
-        if (_errorOnScreen) {
-            clearScreen()
+        if (_state != State.ENTERING_INPUT) {
+            clearScreenForInput()
         }
 
         val s = when (view.id) {
@@ -78,8 +82,8 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
 
     @Suppress("UNUSED_PARAMETER")
     fun backspaceButtonClicked(view: View) {
-        if (_errorOnScreen) {
-            clearScreen()
+        if (_state != State.ENTERING_INPUT) {
+            clearScreenForInput()
             return
         }
         val numChars = userStr.value!!.length
@@ -90,22 +94,27 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
 
     @Suppress("UNUSED_PARAMETER")
     fun equalsButtonClicked(view: View) {
-        if (!_errorOnScreen && userStr.value!!.isNotEmpty()) {
+        if (_state == State.ENTERING_INPUT && userStr.value!!.isNotEmpty()) {
             computeResult()
         }
     }
 
-    private fun computeResult() {
+    private fun computeResult(print: Boolean = true): Double {
         try {
             val tree = parseString()
             val result = EvalVisitor().visit(tree)
-            printResult(result)
+            if (print) {
+                printResult(result)
+            }
+            return result
         } catch (e: IllegalStateException) {
             _userStr.value = _app.getString(R.string.syntax_error)
-            _errorOnScreen = true
+            _state = State.SHOWING_ERROR
+            return -1.0
         } catch (e: DivideByZeroException) {
             _userStr.value = _app.getString(R.string.divided_by_zero)
-            _errorOnScreen = true
+            _state = State.SHOWING_ERROR
+            return -2.0
         }
     }
 
@@ -128,10 +137,18 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
     }
 
     private fun printResult(result: Double) {
-        _userStr.value = if (result == truncate(result))
-            result.toLong().toString()
-        else
-            String.format(Locale.US, "%g", result)
+        var numberStr = String.format(Locale.US, "%g", result)
+
+        if (numberStr.contains("[eE]".toRegex())) {
+            numberStr = numberStr.replace("0+e".toRegex(), "e")
+            numberStr = numberStr.replace("""\.e""".toRegex(), "e")
+        } else if (numberStr.contains(".")) {
+            numberStr = numberStr.replace("0*$".toRegex(), "")
+            numberStr = numberStr.replace("""\.$""".toRegex(), "")
+        }
+
+        _userStr.postValue(numberStr) // postValue cause method is also called on background thread
+        _state = State.SHOWING_RESULT
     }
 
     fun convertTo(targetCurrency: Currency) {
@@ -140,9 +157,7 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
             return
         }
 
-        val amount = userStr.value!!.toDouble()
-
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.IO) {
             try {
                 val response = FixerApi.convertService.getExchangeRate(
                     getYesterdayDateString(), BuildConfig.FIXER_IO_KEY,
@@ -150,28 +165,32 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
                 )
 
                 if (response.success) {
+                    val amount = if (_state == State.ENTERING_INPUT)
+                        computeResult(print = false) else userStr.value!!.toDouble()
                     val rate = getRate(response, targetCurrency)
-                    _userStr.postValue("${amount * rate}")
+                    printResult(amount * rate)
                     _baseCurrency.postValue(targetCurrency)
                 } else {
                     _userStr.postValue(_app.getString(R.string.api_error, response.error!!.code))
-                    _errorOnScreen = true
+                    _state = State.SHOWING_ERROR
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 _userStr.postValue(_app.getString(R.string.network_error))
-                _errorOnScreen = true
+                _state = State.SHOWING_ERROR
             }
         }
     }
 
     private fun inputInvalid(): Boolean {
-        if (_errorOnScreen || userStr.value!!.isEmpty()) {
+        if (_state == State.SHOWING_ERROR || userStr.value!!.isEmpty()) {
             return true
         }
 
-        computeResult()
-        return _errorOnScreen
+        if (_state == State.ENTERING_INPUT) {
+            computeResult(print = false)
+        }
+        return _state == State.SHOWING_ERROR
     }
 
     private fun getYesterdayDateString(): String {
