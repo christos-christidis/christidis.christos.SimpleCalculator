@@ -39,11 +39,25 @@
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">0dp</item>
         <item name="android:gravity">center_vertical|end</item>
-        <item name="android:textSize">30sp</item>
         <item name="android:paddingStart">@dimen/screen_padding_start</item>
         <item name="android:paddingEnd">@dimen/screen_padding_end</item>
         <item name="android:paddingTop">@dimen/screen_padding_top</item>
         <item name="android:paddingBottom">@dimen/screen_padding_bottom</item>
+        <item name="android:textSize">30sp</item>
         <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="LoadindCardView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:visibility">invisible</item>
+    </style>
+
+    <style name="LoadingTextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:text">@string/waiting_for_fixer</item>
+        <item name="android:textSize">20sp</item>
     </style>
 </resources>

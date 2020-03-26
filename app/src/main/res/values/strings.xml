@@ -35,4 +35,5 @@
     <string name="cad">CAD (Canadian Dollar)</string>
     <string name="chf">CHF (Swiss Franc)</string>
     <string name="currency_flag">Currency flag</string>
+    <string name="waiting_for_fixer">Waiting for Fixer.io…</string>
 </resources>

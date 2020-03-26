@@ -3,9 +3,11 @@ package com.christidischristos.simplecalculator.ui
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -24,6 +26,8 @@ class MainActivity : AppCompatActivity() {
         const val STATE_BASE_CURRENCIES_VISIBLE = "state_base_currencies_visible"
     }
 
+    private val _handler = Handler()
+
     private val _viewModel: SimpleCalcViewModel by lazy { getViewModel() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +39,8 @@ class MainActivity : AppCompatActivity() {
         binding.lifecycleOwner = this
         binding.viewModel = _viewModel
 
-        setUpAllTheStuff()
+        setUpViews()
+        observeViewModel()
     }
 
     private fun getViewModel(): SimpleCalcViewModel {
@@ -43,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         return ViewModelProvider(this, viewModelFactory).get(SimpleCalcViewModel::class.java)
     }
 
-    private fun setUpAllTheStuff() {
+    private fun setUpViews() {
         button_backspace.setOnLongClickListener {
             _viewModel.clearScreenForInput()
             true
@@ -55,11 +60,25 @@ class MainActivity : AppCompatActivity() {
             base_currencies_recycler_view.visibility = View.INVISIBLE
             _viewModel.changeBaseCurrency(it)
         }
+    }
 
+    private fun observeViewModel() {
         _viewModel.toastMessage.observe(this, Observer {
             it?.let {
                 _viewModel.toastMessageSeen()
                 MyToast.showToastCenter(this, it, Toast.LENGTH_LONG)
+            }
+        })
+        _viewModel.fetchingRates.observe(this, Observer {
+            if (it) {
+                disableTouch()
+                _handler.postDelayed({
+                    loading_card_view.visibility = View.VISIBLE
+                }, 2000)
+            } else {
+                _handler.removeCallbacksAndMessages(null)
+                loading_card_view.visibility = View.INVISIBLE
+                enableTouch()
             }
         })
     }
@@ -136,6 +155,18 @@ class MainActivity : AppCompatActivity() {
                     _animationRunning = false
                 }
             })
+        }
+    }
+
+    private fun disableTouch() {
+        for (child in main_layout.children) {
+            child.setOnTouchListener { _, _ -> true }
+        }
+    }
+
+    private fun enableTouch() {
+        for (child in main_layout.children) {
+            child.setOnTouchListener(null)
         }
     }
 }

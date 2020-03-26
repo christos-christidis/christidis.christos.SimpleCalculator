@@ -26,7 +26,8 @@
             app:layout_constraintEnd_toStartOf="@id/base_currency"
             app:layout_constraintTop_toTopOf="parent"
             tools:itemCount="6"
-            tools:listitem="@layout/base_currencies_list_item" />
+            tools:listitem="@layout/base_currencies_list_item"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/base_currency"
@@ -45,12 +46,19 @@
             android:id="@+id/screen"
             style="@style/Screen"
             android:text="@{viewModel.userStr}"
-            app:layout_constraintBottom_toTopOf="@id/guideline"
+            app:layout_constraintBottom_toTopOf="@id/divider"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/base_currency"
             app:text_color="@{viewModel.state}"
             tools:text="0" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorPrimaryDark"
+            app:layout_constraintBottom_toTopOf="@id/guideline" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
@@ -264,5 +272,19 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/button_equals"
             app:layout_constraintTop_toBottomOf="@+id/button_sub" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/loading_card_view"
+            style="@style/LoadindCardView"
+            app:cardElevation="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:visibility="visible">
+
+            <TextView
+                style="@style/LoadingTextView"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.cardview.widget.CardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

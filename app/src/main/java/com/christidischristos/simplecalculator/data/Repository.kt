@@ -12,8 +12,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class Repository {
-    private var _timeLastSaved = 0
-
     fun fetchExchangeRates(
         onSuccess: (response: HistoricalRatesResponse) -> Unit,
         onError: (errorCode: Int) -> Unit,

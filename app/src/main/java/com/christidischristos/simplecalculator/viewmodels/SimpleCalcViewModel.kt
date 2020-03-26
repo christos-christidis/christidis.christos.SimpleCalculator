@@ -34,6 +34,10 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
         _toastMessage.value = null
     }
 
+    private val _fetchingRates = MutableLiveData(false)
+    val fetchingRates: LiveData<Boolean>
+        get() = _fetchingRates
+
     private var _state = MutableLiveData(CalcState.ENTERING_INPUT)
     val state: LiveData<CalcState>
         get() = _state
@@ -128,6 +132,8 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
             return
         }
 
+        _fetchingRates.value = true
+
         // I pass the methods I want to be called by the repository when it has a success, an error
         // or an exception. These lambdas are executed in the background thread by the repository.
         _repository.fetchExchangeRates({
@@ -135,10 +141,13 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
             val rate = CurrencyUtils.computeExchangeRate(baseCurrency.value!!, targetCurrency, it)
             printResult(amount * rate)
             _baseCurrency.postValue(targetCurrency)
+            _fetchingRates.postValue(false)
         }, {
             printError(_app.getString(R.string.api_error, it))
+            _fetchingRates.postValue(false)
         }, {
             printError(_app.getString(R.string.network_error))
+            _fetchingRates.postValue(false)
         })
     }
 
