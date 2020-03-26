@@ -1,5 +1,6 @@
 package com.christidischristos.simplecalculator.enums
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.christidischristos.simplecalculator.R
 
@@ -16,6 +17,19 @@ enum class Currency {
             AUD -> R.string.aud
             CAD -> R.string.cad
             CHF -> R.string.chf
+        }
+    }
+
+    @DrawableRes
+    fun getFlagResId(): Int {
+        return when (this) {
+            USD -> R.drawable.us_flag
+            EUR -> R.drawable.eu_flag
+            JPY -> R.drawable.japan_flag
+            GBP -> R.drawable.uk_flag
+            AUD -> R.drawable.australia_flag
+            CAD -> R.drawable.canada_flag
+            CHF -> R.drawable.swiss_flag
         }
     }
 

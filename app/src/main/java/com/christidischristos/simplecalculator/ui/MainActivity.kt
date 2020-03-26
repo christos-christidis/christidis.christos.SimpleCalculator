@@ -3,8 +3,6 @@ package com.christidischristos.simplecalculator.ui
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
-import android.view.ContextMenu
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +20,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
+    companion object {
+        const val STATE_BASE_CURRENCIES_VISIBLE = "state_base_currencies_visible"
+    }
+
     private val _viewModel: SimpleCalcViewModel by lazy { getViewModel() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +34,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.lifecycleOwner = this
         binding.viewModel = _viewModel
+
+        setUpAllTheStuff()
     }
 
     private fun getViewModel(): SimpleCalcViewModel {
@@ -39,17 +43,15 @@ class MainActivity : AppCompatActivity() {
         return ViewModelProvider(this, viewModelFactory).get(SimpleCalcViewModel::class.java)
     }
 
-    override fun onStart() {
-        super.onStart()
-
+    private fun setUpAllTheStuff() {
         button_backspace.setOnLongClickListener {
             _viewModel.clearScreenForInput()
             true
         }
 
-        registerForContextMenu(button_convert)
+        val currencies = Currency.getAllExcept(_viewModel.baseCurrency.value!!)
 
-        base_currencies_recycler_view.adapter = CurrencyAdapter {
+        base_currencies_recycler_view.adapter = BaseCurrenciesAdapter(currencies) {
             base_currencies_recycler_view.visibility = View.INVISIBLE
             _viewModel.changeBaseCurrency(it)
         }
@@ -62,29 +64,37 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun convertButtonClicked(view: View) {
-        view.performLongClick()
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(
+            STATE_BASE_CURRENCIES_VISIBLE, base_currencies_recycler_view.visibility == View.VISIBLE
+        )
     }
 
-    override fun onCreateContextMenu(
-        menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?
-    ) {
-        super.onCreateContextMenu(menu, v, menuInfo)
-        menu?.setHeaderTitle(R.string.convert_to)
-        for (currency in Currency.values()) {
-            if (currency != _viewModel.baseCurrency.value) {
-                menu?.add(0, currency.ordinal, currency.ordinal, currency.toTitleRes())
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        base_currencies_recycler_view.visibility =
+            if (savedInstanceState.getBoolean(STATE_BASE_CURRENCIES_VISIBLE))
+                View.VISIBLE else View.INVISIBLE
+    }
+
+    private lateinit var _dialogFragment: ConversionMenuDialogFragment
+
+    fun convertButtonClicked(view: View) {
+        val currencies = Currency.getAllExcept(_viewModel.baseCurrency.value!!)
+
+        val adapter = ConversionMenuAdapter(currencies) {
+            _dialogFragment.dismiss()
+
+            if (NetUtils.isInternetAvailable(this)) {
+                _viewModel.convertTo(it)
+            } else {
+                MyToast.showToastCenter(this, R.string.internet_not_available, Toast.LENGTH_LONG)
             }
         }
-    }
 
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        if (NetUtils.isInternetAvailable(this)) {
-            _viewModel.convertTo(Currency.values()[item.itemId])
-        } else {
-            MyToast.showToastCenter(this, R.string.internet_not_available, Toast.LENGTH_LONG)
-        }
-        return true
+        _dialogFragment = ConversionMenuDialogFragment(adapter)
+        _dialogFragment.show(supportFragmentManager, "CONVERSION_MENU_DIALOG_TAG")
     }
 
     private var _animationRunning = false
@@ -122,6 +132,7 @@ class MainActivity : AppCompatActivity() {
             setListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
                     base_currencies_recycler_view.visibility = View.INVISIBLE
+                    base_currencies_recycler_view.alpha = 1f
                     _animationRunning = false
                 }
             })

@@ -34,4 +34,5 @@
     <string name="aud">AUD (Australian Dollar)</string>
     <string name="cad">CAD (Canadian Dollar)</string>
     <string name="chf">CHF (Swiss Franc)</string>
+    <string name="currency_flag">Currency flag</string>
 </resources>

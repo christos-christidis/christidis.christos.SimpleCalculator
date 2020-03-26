@@ -7,10 +7,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.christidischristos.simplecalculator.R
 import com.christidischristos.simplecalculator.enums.Currency
 
-class CurrencyAdapter(private val _clickListener: (Currency) -> Unit) :
-    RecyclerView.Adapter<CurrencyAdapter.ViewHolder>() {
-
-    private var _items = listOf<Currency>()
+class BaseCurrenciesAdapter(
+    private var _items: List<Currency>, private val _clickListener: (Currency) -> Unit
+) : RecyclerView.Adapter<BaseCurrenciesAdapter.ViewHolder>() {
 
     fun setItems(items: List<Currency>) {
         _items = items
