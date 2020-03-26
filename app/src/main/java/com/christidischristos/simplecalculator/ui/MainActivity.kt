@@ -2,8 +2,11 @@ package com.christidischristos.simplecalculator.ui
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -95,6 +98,18 @@ class MainActivity : AppCompatActivity() {
         base_currencies_recycler_view.visibility =
             if (savedInstanceState.getBoolean(STATE_BASE_CURRENCIES_VISIBLE))
                 View.VISIBLE else View.INVISIBLE
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_settings) {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private lateinit var _dialogFragment: ConversionMenuDialogFragment

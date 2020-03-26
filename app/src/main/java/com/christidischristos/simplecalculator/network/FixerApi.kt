@@ -22,7 +22,7 @@ private val retrofit = Retrofit.Builder()
 
 interface ConvertService {
     @GET("{date}")
-    suspend fun getExchangeRate(
+    suspend fun getExchangeRates(
         @Path("date") yesterday: String,
         @Query("access_key") apiKey: String,
         @Query("base") baseCurrency: String,

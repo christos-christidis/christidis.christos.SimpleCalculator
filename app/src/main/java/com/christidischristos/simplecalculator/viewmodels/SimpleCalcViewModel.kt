@@ -16,7 +16,7 @@ import java.util.*
 
 class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
 
-    private val _repository = Repository()
+    private val _repository = Repository(_app)
 
     private val _baseCurrency = MutableLiveData(Currency.EUR)
     val baseCurrency: LiveData<Currency>
