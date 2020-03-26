@@ -20,4 +20,29 @@
     <style name="CalculatorButton.Small">
         <item name="android:textSize">25sp</item>
     </style>
+
+    <style name="BaseCurrenciesRecyclerView">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="BaseCurrencyTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">end</item>
+        <item name="android:paddingTop">@dimen/base_currency_text_view_padding_top</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="Screen">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:gravity">center_vertical|end</item>
+        <item name="android:textSize">30sp</item>
+        <item name="android:paddingStart">@dimen/screen_padding_start</item>
+        <item name="android:paddingEnd">@dimen/screen_padding_end</item>
+        <item name="android:paddingTop">@dimen/screen_padding_top</item>
+        <item name="android:paddingBottom">@dimen/screen_padding_bottom</item>
+    </style>
 </resources>

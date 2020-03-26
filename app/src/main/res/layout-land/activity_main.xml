@@ -11,20 +11,30 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         tools:context=".ui.MainActivity">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/base_currencies_recycler_view"
+            style="@style/BaseCurrenciesRecyclerView"
+            android:visibility="invisible"
+            app:base_currency="@{viewModel.baseCurrency}"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintEnd_toStartOf="@id/base_currency"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:itemCount="6"
+            tools:listitem="@layout/base_currencies_list_item" />
+
         <TextView
             android:id="@+id/base_currency"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:paddingTop="8dp"
+            style="@style/BaseCurrencyTextView"
+            android:onClick="baseCurrencyClicked"
             android:paddingEnd="16dp"
             android:text="@{viewModel.baseCurrency.toString()}"
-            android:textSize="20sp"
+            android:textColor="@android:color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="RtlSymmetry"
@@ -32,16 +42,11 @@
 
         <TextView
             android:id="@+id/screen"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:gravity="center_vertical|end"
-            android:paddingStart="16dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="8dp"
+            style="@style/Screen"
             android:text="@{viewModel.userStr}"
-            android:textSize="30sp"
             app:layout_constraintBottom_toTopOf="@id/guideline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/base_currency"
             tools:text="0" />
 

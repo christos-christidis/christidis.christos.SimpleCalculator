@@ -1,5 +1,7 @@
 package com.christidischristos.simplecalculator.ui
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
 import android.view.ContextMenu
 import android.view.MenuItem
@@ -17,7 +19,6 @@ import com.christidischristos.simplecalculator.util.NetUtils
 import com.christidischristos.simplecalculator.viewmodelfactories.SimpleCalcViewModelFactory
 import com.christidischristos.simplecalculator.viewmodels.SimpleCalcViewModel
 import kotlinx.android.synthetic.main.activity_main.*
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,6 +48,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         registerForContextMenu(button_convert)
+
+        base_currencies_recycler_view.adapter = CurrencyAdapter {
+            base_currencies_recycler_view.visibility = View.INVISIBLE
+            _viewModel.changeBaseCurrency(it)
+        }
 
         _viewModel.toastMessage.observe(this, Observer {
             it?.let {
@@ -79,6 +85,47 @@ class MainActivity : AppCompatActivity() {
             MyToast.showToastCenter(this, R.string.internet_not_available, Toast.LENGTH_LONG)
         }
         return true
+    }
+
+    private var _animationRunning = false
+
+    fun baseCurrencyClicked(view: View) {
+        if (_animationRunning) {
+            return
+        }
+
+        _animationRunning = true
+
+        if (base_currencies_recycler_view.visibility == View.INVISIBLE) {
+            showRecyclerView()
+        } else {
+            hideRecyclerView()
+        }
+    }
+
+    private fun showRecyclerView() {
+        base_currencies_recycler_view.alpha = 0f
+        base_currencies_recycler_view.visibility = View.VISIBLE
+        base_currencies_recycler_view.animate().alpha(1f).apply {
+            duration = 300
+            setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    _animationRunning = false
+                }
+            })
+        }
+    }
+
+    private fun hideRecyclerView() {
+        base_currencies_recycler_view.animate().alpha(0f).apply {
+            duration = 300
+            setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    base_currencies_recycler_view.visibility = View.INVISIBLE
+                    _animationRunning = false
+                }
+            })
+        }
     }
 }
 

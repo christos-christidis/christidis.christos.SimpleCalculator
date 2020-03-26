@@ -51,6 +51,10 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
         _state = State.ENTERING_INPUT
     }
 
+    fun changeBaseCurrency(currency: Currency) {
+        _baseCurrency.value = currency
+    }
+
     fun plainButtonClicked(view: View) {
         if (_state != State.ENTERING_INPUT) {
             clearScreenForInput()

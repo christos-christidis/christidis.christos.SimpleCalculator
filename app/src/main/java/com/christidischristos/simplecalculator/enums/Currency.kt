@@ -22,5 +22,11 @@ enum class Currency {
     companion object {
         val nonEuroCurrencies = values().joinToString(",")
             .replace("EUR,", "")
+
+        fun getAllExcept(currency: Currency): List<Currency> {
+            return values().toMutableList().apply {
+                remove(currency)
+            }
+        }
     }
 }
