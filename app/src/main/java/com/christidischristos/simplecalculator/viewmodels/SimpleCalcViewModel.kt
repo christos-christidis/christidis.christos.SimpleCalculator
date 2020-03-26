@@ -5,25 +5,18 @@ import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.christidischristos.simplecalculator.BuildConfig
 import com.christidischristos.simplecalculator.R
+import com.christidischristos.simplecalculator.data.Repository
 import com.christidischristos.simplecalculator.enums.CalcState
 import com.christidischristos.simplecalculator.enums.Currency
 import com.christidischristos.simplecalculator.grammar.DivideByZeroException
-import com.christidischristos.simplecalculator.grammar.EvalVisitor
-import com.christidischristos.simplecalculator.grammar.SimpleCalcLexer
-import com.christidischristos.simplecalculator.grammar.SimpleCalcParser
-import com.christidischristos.simplecalculator.network.FixerApi
 import com.christidischristos.simplecalculator.util.CurrencyUtils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.antlr.v4.runtime.*
-import org.antlr.v4.runtime.tree.ParseTree
-import java.text.SimpleDateFormat
+import com.christidischristos.simplecalculator.util.ParsingUtils
 import java.util.*
 
 class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
+
+    private val _repository = Repository()
 
     private val _baseCurrency = MutableLiveData(Currency.EUR)
     val baseCurrency: LiveData<Currency>
@@ -98,45 +91,15 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
     @Suppress("UNUSED_PARAMETER")
     fun equalsButtonClicked(view: View) {
         if (state.value == CalcState.ENTERING_INPUT && userStr.value!!.isNotEmpty()) {
-            computeResult()
-        }
-    }
-
-    private fun computeResult(print: Boolean = true): Double {
-        try {
-            val tree = parseString()
-            val result = EvalVisitor().visit(tree)
-            if (print) {
+            try {
+                val result = ParsingUtils.computeResult(userStr.value!!)
                 printResult(result)
+            } catch (e: IllegalStateException) {
+                printError(_app.getString(R.string.syntax_error))
+            } catch (e: DivideByZeroException) {
+                printError(_app.getString(R.string.divided_by_zero))
             }
-            return result
-        } catch (e: IllegalStateException) {
-            _userStr.postValue(_app.getString(R.string.syntax_error))
-            _state.postValue(CalcState.SHOWING_ERROR)
-            return -1.0
-        } catch (e: DivideByZeroException) {
-            _userStr.postValue(_app.getString(R.string.divided_by_zero))
-            _state.postValue(CalcState.SHOWING_ERROR)
-            return -2.0
         }
-    }
-
-    private fun parseString(): ParseTree {
-        val charStream = CharStreams.fromString(userStr.value)
-        val lexer = SimpleCalcLexer(charStream)
-        val tokens = CommonTokenStream(lexer)
-        val parser = SimpleCalcParser(tokens).apply {
-            addErrorListener(object : BaseErrorListener() {
-                override fun syntaxError(
-                    recognizer: Recognizer<*, *>?, offendingSymbol: Any?, line: Int,
-                    charPositionInLine: Int, msg: String?, e: RecognitionException?
-                ) {
-                    // normally the parser doesn't throw exception on mismatches!
-                    throw IllegalStateException()
-                }
-            })
-        }
-        return parser.main()
     }
 
     private fun printResult(result: Double) {
@@ -154,35 +117,29 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
         _state.postValue(CalcState.SHOWING_RESULT)
     }
 
+    private fun printError(error: String) {
+        _userStr.postValue(error)
+        _state.postValue(CalcState.SHOWING_ERROR)
+    }
+
     fun convertTo(targetCurrency: Currency) {
         if (inputInvalid()) {
             _toastMessage.value = R.string.input_not_valid
             return
         }
 
-        GlobalScope.launch(Dispatchers.IO) {
-            try {
-                val response = FixerApi.convertService.getExchangeRate(
-                    getYesterdayDateString(), BuildConfig.FIXER_IO_KEY,
-                    "EUR", Currency.nonEuroCurrencies
-                )
-
-                if (response.success) {
-                    val amount = if (state.value == CalcState.ENTERING_INPUT)
-                        computeResult(print = false) else userStr.value!!.toDouble()
-                    val rate = CurrencyUtils.getRate(baseCurrency.value!!, targetCurrency, response)
-                    printResult(amount * rate)
-                    _baseCurrency.postValue(targetCurrency)
-                } else {
-                    _userStr.postValue(_app.getString(R.string.api_error, response.error!!.code))
-                    _state.postValue(CalcState.SHOWING_ERROR)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _userStr.postValue(_app.getString(R.string.network_error))
-                _state.postValue(CalcState.SHOWING_ERROR)
-            }
-        }
+        // I pass the methods I want to be called by the repository when it has a success, an error
+        // or an exception. These lambdas are executed in the background thread by the repository.
+        _repository.fetchExchangeRates({
+            val amount = ParsingUtils.computeResult(userStr.value!!)
+            val rate = CurrencyUtils.computeExchangeRate(baseCurrency.value!!, targetCurrency, it)
+            printResult(amount * rate)
+            _baseCurrency.postValue(targetCurrency)
+        }, {
+            printError(_app.getString(R.string.api_error, it))
+        }, {
+            printError(_app.getString(R.string.network_error))
+        })
     }
 
     private fun inputInvalid(): Boolean {
@@ -191,14 +148,17 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
         }
 
         if (state.value == CalcState.ENTERING_INPUT) {
-            computeResult(print = false)
+            try {
+                ParsingUtils.computeResult(userStr.value!!)
+            } catch (e: IllegalStateException) {
+                printError(_app.getString(R.string.syntax_error))
+                return true
+            } catch (e: DivideByZeroException) {
+                printError(_app.getString(R.string.divided_by_zero))
+                return true
+            }
         }
-        return state.value == CalcState.SHOWING_ERROR
-    }
 
-    private fun getYesterdayDateString(): String {
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DATE, -1)
-        return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(calendar.time)
+        return false
     }
 }

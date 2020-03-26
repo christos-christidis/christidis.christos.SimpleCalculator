@@ -11,7 +11,7 @@ object CurrencyUtils {
         return this[currency] ?: error("CurrencyUtils: This should never happen.")
     }
 
-    fun getRate(
+    fun computeExchangeRate(
         baseCurrency: Currency, targetCurrency: Currency, response: HistoricalRatesResponse
     ): Double {
         requireNotNull(response.rates)
