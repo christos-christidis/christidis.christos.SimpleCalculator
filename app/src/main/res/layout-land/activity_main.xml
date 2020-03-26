@@ -31,6 +31,7 @@
         <TextView
             android:id="@+id/base_currency"
             style="@style/BaseCurrencyTextView"
+            android:drawableStart="@drawable/arrow_left"
             android:onClick="baseCurrencyClicked"
             android:paddingEnd="16dp"
             android:text="@{viewModel.baseCurrency.toString()}"
@@ -48,6 +49,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/base_currency"
+            app:text_color="@{viewModel.state}"
             tools:text="0" />
 
         <androidx.constraintlayout.widget.Guideline
@@ -62,6 +64,8 @@
             style="@style/CalculatorButton.Small"
             android:onClick="convertButtonClicked"
             android:text="@string/convert"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="20sp"
             app:layout_constraintBottom_toTopOf="@id/button_6"
             app:layout_constraintEnd_toStartOf="@id/button_left_paren"
             app:layout_constraintStart_toStartOf="parent"
@@ -102,7 +106,10 @@
             style="@style/CalculatorButton.Small"
             android:contentDescription="@string/backspace_button"
             android:onClick="@{viewModel::backspaceButtonClicked}"
+            android:scaleX="1.5"
+            android:scaleY="1.5"
             android:src="@drawable/ic_backspace"
+            android:tint="@color/colorPrimaryDark"
             app:layout_constraintBottom_toTopOf="@id/button_mul"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/button_div"

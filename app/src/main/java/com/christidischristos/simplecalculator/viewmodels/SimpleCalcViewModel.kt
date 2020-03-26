@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.christidischristos.simplecalculator.BuildConfig
 import com.christidischristos.simplecalculator.R
+import com.christidischristos.simplecalculator.enums.CalcState
 import com.christidischristos.simplecalculator.enums.Currency
 import com.christidischristos.simplecalculator.grammar.DivideByZeroException
 import com.christidischristos.simplecalculator.grammar.EvalVisitor
@@ -40,15 +41,13 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
         _toastMessage.value = null
     }
 
-    private enum class State {
-        ENTERING_INPUT, SHOWING_RESULT, SHOWING_ERROR
-    }
-
-    private var _state = State.ENTERING_INPUT
+    private var _state = MutableLiveData(CalcState.ENTERING_INPUT)
+    val state: LiveData<CalcState>
+        get() = _state
 
     fun clearScreenForInput() {
         _userStr.value = ""
-        _state = State.ENTERING_INPUT
+        _state.value = CalcState.ENTERING_INPUT
     }
 
     fun changeBaseCurrency(currency: Currency) {
@@ -56,7 +55,7 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
     }
 
     fun plainButtonClicked(view: View) {
-        if (_state != State.ENTERING_INPUT) {
+        if (state.value != CalcState.ENTERING_INPUT) {
             clearScreenForInput()
         }
 
@@ -86,7 +85,7 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
 
     @Suppress("UNUSED_PARAMETER")
     fun backspaceButtonClicked(view: View) {
-        if (_state != State.ENTERING_INPUT) {
+        if (state.value != CalcState.ENTERING_INPUT) {
             clearScreenForInput()
             return
         }
@@ -98,7 +97,7 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
 
     @Suppress("UNUSED_PARAMETER")
     fun equalsButtonClicked(view: View) {
-        if (_state == State.ENTERING_INPUT && userStr.value!!.isNotEmpty()) {
+        if (state.value == CalcState.ENTERING_INPUT && userStr.value!!.isNotEmpty()) {
             computeResult()
         }
     }
@@ -112,12 +111,12 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
             }
             return result
         } catch (e: IllegalStateException) {
-            _userStr.value = _app.getString(R.string.syntax_error)
-            _state = State.SHOWING_ERROR
+            _userStr.postValue(_app.getString(R.string.syntax_error))
+            _state.postValue(CalcState.SHOWING_ERROR)
             return -1.0
         } catch (e: DivideByZeroException) {
-            _userStr.value = _app.getString(R.string.divided_by_zero)
-            _state = State.SHOWING_ERROR
+            _userStr.postValue(_app.getString(R.string.divided_by_zero))
+            _state.postValue(CalcState.SHOWING_ERROR)
             return -2.0
         }
     }
@@ -151,8 +150,8 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
             numberStr = numberStr.replace("""\.$""".toRegex(), "")
         }
 
-        _userStr.postValue(numberStr) // postValue cause method is also called on background thread
-        _state = State.SHOWING_RESULT
+        _userStr.postValue(numberStr)
+        _state.postValue(CalcState.SHOWING_RESULT)
     }
 
     fun convertTo(targetCurrency: Currency) {
@@ -169,32 +168,32 @@ class SimpleCalcViewModel(private val _app: Application) : ViewModel() {
                 )
 
                 if (response.success) {
-                    val amount = if (_state == State.ENTERING_INPUT)
+                    val amount = if (state.value == CalcState.ENTERING_INPUT)
                         computeResult(print = false) else userStr.value!!.toDouble()
                     val rate = CurrencyUtils.getRate(baseCurrency.value!!, targetCurrency, response)
                     printResult(amount * rate)
                     _baseCurrency.postValue(targetCurrency)
                 } else {
                     _userStr.postValue(_app.getString(R.string.api_error, response.error!!.code))
-                    _state = State.SHOWING_ERROR
+                    _state.postValue(CalcState.SHOWING_ERROR)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 _userStr.postValue(_app.getString(R.string.network_error))
-                _state = State.SHOWING_ERROR
+                _state.postValue(CalcState.SHOWING_ERROR)
             }
         }
     }
 
     private fun inputInvalid(): Boolean {
-        if (_state == State.SHOWING_ERROR || userStr.value!!.isEmpty()) {
+        if (state.value == CalcState.SHOWING_ERROR || userStr.value!!.isEmpty()) {
             return true
         }
 
-        if (_state == State.ENTERING_INPUT) {
+        if (state.value == CalcState.ENTERING_INPUT) {
             computeResult(print = false)
         }
-        return _state == State.SHOWING_ERROR
+        return state.value == CalcState.SHOWING_ERROR
     }
 
     private fun getYesterdayDateString(): String {

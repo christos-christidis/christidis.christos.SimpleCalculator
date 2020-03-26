@@ -18,7 +18,7 @@
     <string name="nine">9</string>
     <string name="dot">.</string>
     <string name="equals">=</string>
-    <string name="convert">cnv</string>
+    <string name="convert">CONV\nERT</string>
     <string name="left_paren">(</string>
     <string name="right_paren">)</string>
     <string name="backspace_button">backspace button</string>
